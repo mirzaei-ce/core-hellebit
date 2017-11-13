@@ -1,0 +1,33 @@
+# /etc/conf.d/hellebitd: config file for /etc/init.d/hellebitd
+
+# Config file location
+#HELLEBITD_CONFIGFILE="/etc/hellebit/hellebit.conf"
+
+# What directory to write pidfile to?  (created and owned by $HELLEBITD_USER)
+#HELLEBITD_PIDDIR="/var/run/hellebitd"
+
+# What filename to give the pidfile
+#HELLEBITD_PIDFILE="${HELLEBITD_PIDDIR}/hellebitd.pid"
+
+# Where to write hellebitd data (be mindful that the blockchain is large)
+#HELLEBITD_DATADIR="/var/lib/hellebitd"
+
+# User and group to own hellebitd process
+#HELLEBITD_USER="hellebit"
+#HELLEBITD_GROUP="hellebit"
+
+# Path to hellebitd executable
+#HELLEBITD_BIN="/usr/bin/hellebitd"
+
+# Nice value to run hellebitd under
+#HELLEBITD_NICE=0
+
+# Additional options (avoid -conf and -datadir, use flags above)
+HELLEBITD_OPTS="-disablewallet"
+
+# The timeout in seconds OpenRC will wait for hellebitd to terminate
+# after a SIGTERM has been raised.
+# Note that this will be mapped as argument to start-stop-daemon's
+# '--retry' option, which means you can specify a retry schedule
+# here. For more information see man 8 start-stop-daemon.
+HELLEBITD_SIGTERM_TIMEOUT=60

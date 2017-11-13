@@ -1,0 +1,45 @@
+bin_PROGRAMS += bench/bench_hellebit
+BENCH_SRCDIR = bench
+BENCH_BINARY = bench/bench_hellebit$(EXEEXT)
+
+
+bench_bench_hellebit_SOURCES = \
+  bench/bench_hellebit.cpp \
+  bench/bench.cpp \
+  bench/bench.h \
+  bench/Examples.cpp
+
+bench_bench_hellebit_CPPFLAGS = $(AM_CPPFLAGS) $(HELLEBIT_INCLUDES) $(EVENT_CLFAGS) $(EVENT_PTHREADS_CFLAGS) -I$(builddir)/bench/
+bench_bench_hellebit_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+bench_bench_hellebit_LDADD = \
+  $(LIBHELLEBIT_SERVER) \
+  $(LIBHELLEBIT_COMMON) \
+  $(LIBHELLEBIT_UNIVALUE) \
+  $(LIBHELLEBIT_UTIL) \
+  $(LIBHELLEBIT_CRYPTO) \
+  $(LIBLEVELDB) \
+  $(LIBMEMENV) \
+  $(LIBSECP256K1)
+
+if ENABLE_ZMQ
+bench_bench_hellebit_LDADD += $(LIBHELLEBIT_ZMQ) $(ZMQ_LIBS)
+endif
+
+if ENABLE_WALLET
+bench_bench_hellebit_LDADD += $(LIBHELLEBIT_WALLET)
+endif
+
+bench_bench_hellebit_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)
+bench_bench_hellebit_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+
+CLEAN_HELLEBIT_BENCH = bench/*.gcda bench/*.gcno
+
+CLEANFILES += $(CLEAN_HELLEBIT_BENCH)
+
+hellebit_bench: $(BENCH_BINARY)
+
+bench: $(BENCH_BINARY) FORCE
+	$(BENCH_BINARY)
+
+hellebit_bench_clean : FORCE
+	rm -f $(CLEAN_HELLEBIT_BENCH) $(bench_bench_hellebit_OBJECTS) $(BENCH_BINARY)

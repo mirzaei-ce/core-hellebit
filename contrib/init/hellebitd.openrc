@@ -1,0 +1,92 @@
+#!/sbin/runscript
+
+# backward compatibility for existing gentoo layout 
+#
+if [ -d "/var/lib/hellebit/.hellebit" ]; then
+	HELLEBITD_DEFAULT_DATADIR="/var/lib/hellebit/.hellebit"
+else
+	HELLEBITD_DEFAULT_DATADIR="/var/lib/hellebitd"
+fi
+
+HELLEBITD_CONFIGFILE=${HELLEBITD_CONFIGFILE:-/etc/hellebit/hellebit.conf}
+HELLEBITD_PIDDIR=${HELLEBITD_PIDDIR:-/var/run/hellebitd}
+HELLEBITD_PIDFILE=${HELLEBITD_PIDFILE:-${HELLEBITD_PIDDIR}/hellebitd.pid}
+HELLEBITD_DATADIR=${HELLEBITD_DATADIR:-${HELLEBITD_DEFAULT_DATADIR}}
+HELLEBITD_USER=${HELLEBITD_USER:-${HELLEBIT_USER:-hellebit}}
+HELLEBITD_GROUP=${HELLEBITD_GROUP:-hellebit}
+HELLEBITD_BIN=${HELLEBITD_BIN:-/usr/bin/hellebitd}
+HELLEBITD_NICE=${HELLEBITD_NICE:-${NICELEVEL:-0}}
+HELLEBITD_OPTS="${HELLEBITD_OPTS:-${HELLEBIT_OPTS}}"
+
+name="Hellebit Core Daemon"
+description="Hellebit cryptocurrency P2P network daemon"
+
+command="/usr/bin/hellebitd"
+command_args="-pid=\"${HELLEBITD_PIDFILE}\" \
+		-conf=\"${HELLEBITD_CONFIGFILE}\" \
+		-datadir=\"${HELLEBITD_DATADIR}\" \
+		-daemon \
+		${HELLEBITD_OPTS}"
+
+required_files="${HELLEBITD_CONFIGFILE}"
+start_stop_daemon_args="-u ${HELLEBITD_USER} \
+			-N ${HELLEBITD_NICE} -w 2000"
+pidfile="${HELLEBITD_PIDFILE}"
+
+# The retry schedule to use when stopping the daemon. Could be either
+# a timeout in seconds or multiple signal/timeout pairs (like
+# "SIGKILL/180 SIGTERM/300")
+retry="${HELLEBITD_SIGTERM_TIMEOUT}"
+
+depend() {
+	need localmount net
+}
+
+# verify
+# 1) that the datadir exists and is writable (or create it)
+# 2) that a directory for the pid exists and is writable
+# 3) ownership and permissions on the config file
+start_pre() {
+	checkpath \
+	-d \
+	--mode 0750 \
+	--owner "${HELLEBITD_USER}:${HELLEBITD_GROUP}" \
+	"${HELLEBITD_DATADIR}"
+
+	checkpath \
+	-d \
+	--mode 0755 \
+	--owner "${HELLEBITD_USER}:${HELLEBITD_GROUP}" \
+	"${HELLEBITD_PIDDIR}"
+
+	checkpath -f \
+	-o ${HELLEBITD_USER}:${HELLEBITD_GROUP} \
+	-m 0660 \
+	${HELLEBITD_CONFIGFILE}
+
+	checkconfig || return 1
+}
+
+checkconfig()
+{
+	if ! grep -qs '^rpcpassword=' "${HELLEBITD_CONFIGFILE}" ; then
+		eerror ""
+		eerror "ERROR: You must set a secure rpcpassword to run hellebitd."
+		eerror "The setting must appear in ${HELLEBITD_CONFIGFILE}"
+		eerror ""
+		eerror "This password is security critical to securing wallets "
+		eerror "and must not be the same as the rpcuser setting."
+		eerror "You can generate a suitable random password using the following"
+		eerror "command from the shell:"
+		eerror ""
+		eerror "bash -c 'tr -dc a-zA-Z0-9 < /dev/urandom | head -c32 && echo'"
+		eerror ""
+		eerror "It is also recommended that you also set alertnotify so you are "
+		eerror "notified of problems:"
+		eerror ""
+		eerror "ie: alertnotify=echo %%s | mail -s \"Hellebit Alert\"" \
+			"admin@foo.com"
+		eerror ""
+		return 1
+	fi
+}

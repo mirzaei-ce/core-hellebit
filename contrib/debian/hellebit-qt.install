@@ -1,0 +1,6 @@
+usr/local/bin/hellebit-qt usr/bin
+share/pixmaps/hellebit32.xpm usr/share/pixmaps
+share/pixmaps/hellebit16.xpm usr/share/pixmaps
+share/pixmaps/hellebit128.png usr/share/pixmaps
+debian/hellebit-qt.desktop usr/share/applications
+debian/hellebit-qt.protocol usr/share/kde4/services/

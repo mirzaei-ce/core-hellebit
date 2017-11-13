@@ -1,0 +1,12 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Hellebit
+Comment=Hellebit P2P Cryptocurrency
+Comment[fr]=Hellebit, monnaie virtuelle cryptographique pair à pair
+Comment[tr]=Hellebit, eşten eşe kriptografik sanal para birimi
+Exec=hellebit-qt %u
+Terminal=false
+Type=Application
+Icon=hellebit128
+MimeType=x-scheme-handler/hellebit;
+Categories=Office;Finance;
